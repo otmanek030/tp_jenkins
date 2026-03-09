@@ -1,14 +1,12 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.13-slim'
-        }
-    }
+    agent any
 
     stages {
         stage('Install Dependencies') {
             steps {
                 sh '''
+                python3 -m venv venv
+                source venv/bin/activate
                 pip install --upgrade pip
                 pip install -r requirements.txt
                 '''
@@ -17,7 +15,10 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                sh 'python -m pytest test_app.py'
+                sh '''
+                source venv/bin/activate
+                python -m pytest test_app.py
+                '''
             }
         }
 
@@ -34,7 +35,10 @@ pipeline {
 
         stage('SCA Scan') {
             steps {
-                sh 'python -m safety check --output html > safety-report.html || true'
+                sh '''
+                source venv/bin/activate
+                python -m safety check --output html > safety-report.html || true
+                '''
             }
         }
 

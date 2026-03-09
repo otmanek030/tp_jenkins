@@ -7,12 +7,6 @@ pipeline {
 
     stages {
 
-        stage('Clone Repository') {
-            steps {
-                git 'https://github.com/otmanek030/tp_jenkins.git'
-            }
-        }
-
         stage('Install Dependencies') {
             steps {
                 sh '''

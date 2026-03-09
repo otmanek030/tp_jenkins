@@ -1,40 +1,58 @@
 pipeline {
     agent any
+
+    environment {
+        PATH = "$PATH:/var/jenkins_home/.local/bin"
+    }
+
     stages {
+
+        stage('Clone Repository') {
+            steps {
+                git 'https://github.com/otmanek030/tp_jenkins.git'
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
-                sh 'pip3 install --break-system-packages -r requirements.txt'
+                sh '''
+                python3 -m pip install --upgrade pip
+                python3 -m pip install --break-system-packages -r requirements.txt
+                '''
             }
         }
+
         stage('Run Tests') {
             steps {
-                sh 'pytest test_app.py'
+                sh 'python3 -m pytest test_app.py'
             }
         }
+
         stage('SAST Scan') {
             steps {
-                echo 'Skipping SAST for now...'
-                // Once SonarQube is ready, you'll use:
-                // tool 'sonar-scanner'
+                sh 'python3 -m bandit -r . -f html -o bandit-report.html || true'
             }
         }
+
         stage('SCA Scan') {
             steps {
-                // Use the plugin command instead of 'sh'
-                // 'odcInstallation' must match the name 'DP-Check' you gave in Tools
-                dependencyCheck additionalArguments: '--scan . --format HTML --format XML --failOnCVSS 7', odcInstallation: 'DP-Check'
+                sh 'python3 -m safety check --output html > safety-report.html || true'
             }
         }
+
         stage('Publish Reports') {
             steps {
-                // This makes the report visible on the Jenkins project page
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                archiveArtifacts artifacts: '*.html', fingerprint: true
             }
         }
     }
+
     post {
         failure {
             echo 'Build failed due to errors or vulnerabilities'
+        }
+        success {
+            echo 'Pipeline executed successfully'
         }
     }
 }

@@ -5,6 +5,10 @@ pipeline {
         PATH = "$PATH:/var/jenkins_home/.local/bin"
     }
 
+    tools {
+        sonarQubeScanner 'SonarScanner'
+    }
+
     stages {
 
         stage('Install Dependencies') {
@@ -19,6 +23,14 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sh 'python3 -m pytest test_app.py'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh 'sonar-scanner'
+                }
             }
         }
 
@@ -38,15 +50,6 @@ pipeline {
             steps {
                 archiveArtifacts artifacts: '*.html', fingerprint: true
             }
-        }
-    }
-
-    post {
-        failure {
-            echo 'Build failed due to errors or vulnerabilities'
-        }
-        success {
-            echo 'Pipeline executed successfully'
         }
     }
 }

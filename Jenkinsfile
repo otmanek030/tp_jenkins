@@ -1,43 +1,37 @@
 pipeline {
     agent any
-
     stages {
-
-        stage('Clone Repository') {
-            steps {
-                git 'https://github.com/otmanek030/tp_jenkins.git'
-            }
-        }
-
         stage('Install Dependencies') {
             steps {
-                bat 'python -m pip install --upgrade pip'
-                bat 'python -m pip install -r requirements.txt'
+                sh 'pip3 install --break-system-packages -r requirements.txt'
             }
         }
-
         stage('Run Tests') {
             steps {
-                bat 'python -m pytest'
+                sh 'pytest test_app.py'
             }
         }
-
         stage('SAST Scan') {
             steps {
-                // Assurez-vous que SonarScanner est installé et accessible
-                bat 'sonar-scanner'
+                echo 'Skipping SAST for now...'
+                // Once SonarQube is ready, you'll use:
+                // tool 'sonar-scanner'
             }
         }
-
         stage('SCA Scan') {
             steps {
-                // Mettre le chemin complet vers dependency-check.bat sur Windows
-                bat 'C:\\Users\\OTHMANE\\dependency-check\\bin\\dependency-check.bat --project "TP-Jenkins" --scan . --format HTML --out C:\\Users\\OTHMANE\\tp_jenkins\\tp_jenkins\\reports'
+                // Use the plugin command instead of 'sh'
+                // 'odcInstallation' must match the name 'DP-Check' you gave in Tools
+                dependencyCheck additionalArguments: '--scan . --format HTML --format XML --failOnCVSS 7', odcInstallation: 'DP-Check'
             }
         }
-
+        stage('Publish Reports') {
+            steps {
+                // This makes the report visible on the Jenkins project page
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
     }
-
     post {
         failure {
             echo 'Build failed due to errors or vulnerabilities'

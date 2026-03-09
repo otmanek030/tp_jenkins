@@ -20,8 +20,11 @@ pipeline {
         stage('SAST Scan') {
             steps {
                 script {
-                    def scannerHome = tool 'sonar-scanner'   // <- nom utilisé ici
-                    withSonarQubeEnv('sonar-server') {
+                    // Utiliser le nom exact configuré pour SonarScanner
+                    def scannerHome = tool 'SonarScanner'
+
+                    // Utiliser le nom exact configuré pour SonarQube
+                    withSonarQubeEnv('SonarQube') {
                         sh "${scannerHome}/bin/sonar-scanner"
                     }
                 }

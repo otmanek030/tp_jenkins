@@ -1,0 +1,6 @@
+projectKey=jenkins-project
+serverUrl=http://localhost:9000
+serverVersion=26.2.0.119303
+dashboardUrl=http://localhost:9000/dashboard?id=jenkins-project
+ceTaskId=4abecb13-a2b0-4856-a26c-15e3072f7d33
+ceTaskUrl=http://localhost:9000/api/ce/task?id=4abecb13-a2b0-4856-a26c-15e3072f7d33

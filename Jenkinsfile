@@ -1,17 +1,23 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.13-slim'
+        }
+    }
 
     stages {
-        stage('Install Dependencies and Run Tests') {
+        stage('Install Dependencies') {
             steps {
                 sh '''
-                # Run everything inside a Python Docker container
-                docker run --rm -v $PWD:/app -w /app python:3.13-slim /bin/bash -c "
-                    pip install --upgrade pip &&
-                    pip install -r requirements.txt &&
-                    python -m pytest test_app.py
-                "
+                pip install --upgrade pip
+                pip install -r requirements.txt
                 '''
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'python -m pytest test_app.py'
             }
         }
 
@@ -28,13 +34,7 @@ pipeline {
 
         stage('SCA Scan') {
             steps {
-                sh '''
-                docker run --rm -v $PWD:/app -w /app python:3.13-slim /bin/bash -c "
-                    pip install --upgrade pip &&
-                    pip install -r requirements.txt &&
-                    python -m safety check --output html > safety-report.html || true
-                "
-                '''
+                sh 'python -m safety check --output html > safety-report.html || true'
             }
         }
 

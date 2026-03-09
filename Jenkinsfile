@@ -5,16 +5,12 @@ pipeline {
         PATH = "$PATH:/var/jenkins_home/.local/bin"
     }
 
-    tools {
-        sonarRunner 'SonarScanner'
-    }
-
     stages {
 
         stage('Install Dependencies') {
             steps {
                 sh '''
-                python3 -m pip install --upgrade pip --break-system-packages
+                python3 -m pip install --upgrade pip
                 python3 -m pip install --break-system-packages -r requirements.txt
                 '''
             }
@@ -26,17 +22,14 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh "${tool 'SonarScanner'}/bin/sonar-scanner"
-                }
-            }
-        }
-
         stage('SAST Scan') {
             steps {
-                sh 'python3 -m bandit -r . -f html -o bandit-report.html || true'
+                script {
+                    def scannerHome = tool name: 'sonar-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+                    withSonarQubeEnv('sonar-server') {
+                        sh "${scannerHome}/bin/sonar-scanner"
+                    }   
+                }
             }
         }
 
@@ -50,6 +43,15 @@ pipeline {
             steps {
                 archiveArtifacts artifacts: '*.html', fingerprint: true
             }
+        }
+    }
+
+    post {
+        failure {
+            echo 'Build failed due to errors or vulnerabilities'
+        }
+        success {
+            echo 'Pipeline executed successfully'
         }
     }
 }

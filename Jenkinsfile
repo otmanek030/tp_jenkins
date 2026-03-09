@@ -5,20 +5,15 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh '''
-                python3 -m venv venv
-                source venv/bin/activate
-                pip install --upgrade pip
-                pip install -r requirements.txt
+                python3 -m pip install --upgrade pip
+                python3 -m pip install -r requirements.txt
                 '''
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh '''
-                source venv/bin/activate
-                python -m pytest test_app.py
-                '''
+                sh 'python3 -m pytest test_app.py'
             }
         }
 
@@ -35,10 +30,7 @@ pipeline {
 
         stage('SCA Scan') {
             steps {
-                sh '''
-                source venv/bin/activate
-                python -m safety check --output html > safety-report.html || true
-                '''
+                sh 'python3 -m safety check --output html > safety-report.html || true'
             }
         }
 

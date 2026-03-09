@@ -1,8 +1,13 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.13-slim'   // Python environment in Docker
+            args '-u root:root'        // optional, ensures you can install packages
+        }
+    }
 
     environment {
-        PATH = "$PATH:/var/jenkins_home/.local/bin"
+        PATH = "$PATH:/root/.local/bin"
     }
 
     stages {
@@ -10,15 +15,15 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh '''
-                python3 -m pip install --upgrade pip
-                python3 -m pip install --break-system-packages -r requirements.txt
+                python -m pip install --upgrade pip
+                pip install -r requirements.txt
                 '''
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'python3 -m pytest test_app.py'
+                sh 'python -m pytest test_app.py'
             }
         }
 
@@ -35,7 +40,7 @@ pipeline {
 
         stage('SCA Scan') {
             steps {
-                sh 'python3 -m safety check --output html > safety-report.html || true'
+                sh 'python -m safety check --output html > safety-report.html || true'
             }
         }
 

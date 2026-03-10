@@ -15,10 +15,7 @@ pipeline {
             steps {
                 sh 'python3 -m pytest test_app.py'
             }
-
-            steps {
-                sh 'pytest --junitxml=result.xml'
-            }
+            
 
         }
 
@@ -45,12 +42,6 @@ pipeline {
         stage('Publish Reports') {
             steps {
                 archiveArtifacts artifacts: '*.html', fingerprint: true
-            }
-        }
-
-        stage('Publish Test Results') {
-            steps {
-                junit 'result.xml'
             }
         }
     }

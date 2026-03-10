@@ -15,6 +15,11 @@ pipeline {
             steps {
                 sh 'python3 -m pytest test_app.py'
             }
+
+            steps {
+                sh 'pytest --junitxml=result.xml'
+            }
+
         }
 
         stage('SAST Scan') {
@@ -40,6 +45,12 @@ pipeline {
         stage('Publish Reports') {
             steps {
                 archiveArtifacts artifacts: '*.html', fingerprint: true
+            }
+        }
+
+        stage('Publish Test Results') {
+            steps {
+                junit 'result.xml'
             }
         }
     }

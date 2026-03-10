@@ -1,4 +1,4 @@
-flask = 0.0.0
+flask
 pytest
 bandit
 safety

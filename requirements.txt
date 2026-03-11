@@ -1,4 +1,4 @@
 flask
-pytest 0.0.0
+pytest 
 bandit
 safety
